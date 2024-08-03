@@ -35,7 +35,7 @@ def answer_question(query, top_paragraphs):
     model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "You are a helpful and knowledgeable RAG agent assistant."},
-        {"role": "user", "content": f"Answer the query: {query}\nUse the following paragraphs from Paul Graham's essays to generate the answer: {"\n\n".join(top_paragraphs)}\nProvide a concise, concrete and assertive answer in the tone of Paul Graham.\nAnswer: "},
+        {"role": "user", "content": f"Answer the query: {query}\nUse the following paragraphs from Paul Graham's essays to generate the answer: {'\n\n'.join(top_paragraphs)}\nProvide a concise, concrete and assertive answer in the tone of Paul Graham.\nAnswer: "},
     ]
     )
     return completion.choices[0].message.content
