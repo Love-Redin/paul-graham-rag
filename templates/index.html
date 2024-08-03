@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PG's Wisdom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>PG's Wisdom</h1>
+        <h2>Access the distilled insights from <a href="http://www.paulgraham.com/articles.html" target="_blank">Paul Graham's essays</a></h2>
+        <form id="query-form">
+            <input type="text" id="query" name="query" placeholder="Enter your question...">
+            <button type="submit">Submit</button>
+        </form>
+        <div id="loading" style="display: none;">Loading answer...</div>
+        <div id="results">
+            <h2>Answer</h2>
+            <p id="answer"></p>
+            <h2>RAG query</h2>
+            <p id="rag-query"></p>
+            <h2>Top matches</h2>
+            <div id="top-paragraphs"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
