@@ -6,7 +6,20 @@ import numpy as np
 from tqdm import tqdm
 import os
 
-# Purpose of file: fetch data and store in csv file
+# Purpose of script: fetch data and store in csv file
+
+def extract_date(paragraph):
+    # Extracts the date from the paragraph, if possible - else returns None
+    # Regex to match the specific format
+    date_pattern = r'<font face="verdana" size="2">([A-Za-z]+)\s(\d{4})'
+    match = re.search(date_pattern, paragraph.strip())
+    if match:
+        # Extract the month and year
+        month = match.group(1)
+        year = match.group(2)
+        month_year = f"{month} {year}"
+        return month_year
+    
 
 def fetch_articles():
     # Fetches all essays from Paul Graham's website
@@ -19,7 +32,7 @@ def fetch_articles():
 
     articles = {}
 
-    for link in links:
+    for link in links:#[:5]: # only fetch the first 5 articles when in development
         path = link.get('href')
         
         # Use regex to see if path is an article on PG's site, on the format abcd.html
@@ -43,7 +56,9 @@ def get_paragraphs_from_article(article_name, article_url):
     # Extract the paragraphs by splitting on <br/><br/>
     html_content = str(soup)
     paragraphs = html_content.split('<br/><br/>')
+    print(paragraphs)
 
+    created_at = None
 
     # Helpful for filtering out non-text elements
     non_text_start = ['<link', '<table', '<font', '<html', '<hr/>', '</br>', '<script']
@@ -54,68 +69,48 @@ def get_paragraphs_from_article(article_name, article_url):
 
     # Print each paragraph separated by a line
     for p_index, p in enumerate(paragraphs):
+        
         stripped_p = p.strip()
         if stripped_p.startswith(title_start) and stripped_p.endswith(title_end):
             paragraph_type = "TITLE"
         else:
             paragraph_type = "TEXT"
 
+        month_year = None
         for start in non_text_start:
             if stripped_p.startswith(start):
                 paragraph_type = "OTHER"
+                if start == '<font':
+                    month_year = extract_date(stripped_p)
+                    if month_year:
+                        paragraph_type = "DATE"
+                        created_at = month_year
                 break
 
         if stripped_p == "":
             paragraph_type = "EMPTY"
 
-        #print(paragraph_type, "\n", p)
-        #print("----------------")
+        print(paragraph_type, "\n", p)
+        print("----------------")
 
         paragraph_without_tags = re.sub('<[^<]+?>', '', p)
 
         if paragraph_type in ["TEXT", "TITLE"]:
             actual_text.append(paragraph_without_tags)
 
-    return actual_text
+    return actual_text, created_at
 
-""" 
-df = pd.DataFrame()
-
-article_count = 0
-for article_name, article_url in articles.items():
-    article_count += 1
-    actual_text = get_paragraphs_from_article(article_name, article_url)
-    print(article_name)
-    print("\n\n".join(actual_text[:3]))
-    print("-"*50)
-    df.at[article_name, "url"] = article_url
-    df.at[article_name, "text"] = actual_text
-     for p in actual_text:
-        sentences = p.split(".")
-        if len(sentences) <= 10:
-            # then use the full paragraph as an embedding
-
-
-df.to_csv(os.path.join('..', 'data', 'articles.csv')) """
 
 # Create a DataFrame to store the articles
 data = []
 # Process each article
 for article_name, article_url in tqdm(articles.items()):
-    actual_text = get_paragraphs_from_article(article_name, article_url)
-    data.append([article_name, article_url, str(actual_text)])
+    actual_text, created_at = get_paragraphs_from_article(article_name, article_url)
+    data.append([article_name, article_url, str(actual_text), created_at])
 
-df = pd.DataFrame(data, columns=['article', 'url', 'text'])
+df = pd.DataFrame(data, columns=['article', 'url', 'text', 'created_at'])
+
+print(df.head())
 
 # Save the DataFrame to a CSV file
-df.to_csv('data/articles.csv', index=False)
-
-# We have the title and the contents of the article
-# TODO: extract the date when the essay was written
-
-
-def extract_date(text):
-    # Extracts the date from the text
-    pass
-
-
+df.to_csv('data/articles.csv', index=False) # comment out this line when in development

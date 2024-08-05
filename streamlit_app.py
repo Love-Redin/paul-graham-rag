@@ -33,7 +33,7 @@ def answer_question(query, top_paragraphs):
         {"role": "system", "content": "You are a helpful and knowledgeable RAG agent assistant."},
         {"role": "user", 
          "content": f"""Answer the query: {query}
-         Use the following paragraphs from Paul Graham's essays to generate the answer: {'\n\n'.join(top_paragraphs)}
+         Use the following paragraphs from Paul Graham's essays to generate the answer: {'\\n\\n'.join(top_paragraphs)}
          Provide a concise, concrete and assertive answer in the tone of Paul Graham.
          Answer: """},
     ]
@@ -57,10 +57,10 @@ if st.button('Submit'):
         st.write('### Answer')
         st.write(answer)
         
-        st.write('### RAG Query')
+        st.write('### RAG query')
         st.write(rag_query)
         
-        st.write('### Top Paragraphs')
+        st.write('### Top paragraphs')
         for i, paragraph in enumerate(top_paragraphs):
             formatted_paragraph = f"<strong>Match #{i + 1}</strong><br>{paragraph.replace('\n', '<br>')}".replace('$', '\\$')
             st.markdown(formatted_paragraph, unsafe_allow_html=True)
