@@ -10,15 +10,24 @@ import os
 
 def extract_date(paragraph):
     # Extracts the date from the paragraph, if possible - else returns None
-    # Regex to match the specific format
-    date_pattern = r'<font face="verdana" size="2">([A-Za-z]+)\s(\d{4})'
-    match = re.search(date_pattern, paragraph.strip())
+
+    date_pattern = r'(?s)<font.*?>.*?([A-Za-z]+)\s(\d{4})'
+    match = re.search(date_pattern, paragraph)
+
     if match:
         # Extract the month and year
         month = match.group(1)
         year = match.group(2)
         month_year = f"{month} {year}"
         return month_year
+    
+    # TODO: fix date matching bug for the following articles (good enough for now):
+    # Maker's Schedule, Manager's Schedule  https://www.paulgraham.com/makersschedule.html
+    # Disconnecting Distraction https://www.paulgraham.com/distraction.html
+    # What Languages Fix https://www.paulgraham.com/fix.html
+    # Why Arc Isn't Especially Object-Oriented https://www.paulgraham.com/noop.html
+    # Programming Bottom-Up https://www.paulgraham.com/progbot.html
+    # RSS https://www.paulgraham.com/rss.html
     
 
 def fetch_articles():
@@ -39,7 +48,7 @@ def fetch_articles():
         if re.match(r'[a-z]+\.html', str(path)) and "index.html" not in path:
             article_name = link.text
             article_url = f'https://www.paulgraham.com/{path}'
-            print(article_name, article_url)
+            #print(article_name, article_url)
             articles[article_name] = article_url
 
     return articles
@@ -56,7 +65,7 @@ def get_paragraphs_from_article(article_name, article_url):
     # Extract the paragraphs by splitting on <br/><br/>
     html_content = str(soup)
     paragraphs = html_content.split('<br/><br/>')
-    print(paragraphs)
+    #print(paragraphs)
 
     created_at = None
 
@@ -90,14 +99,20 @@ def get_paragraphs_from_article(article_name, article_url):
         if stripped_p == "":
             paragraph_type = "EMPTY"
 
-        print(paragraph_type, "\n", p)
-        print("----------------")
+        #print(paragraph_type, "\n", p)
+        #print("----------------")
 
         paragraph_without_tags = re.sub('<[^<]+?>', '', p)
 
         if paragraph_type in ["TEXT", "TITLE"]:
             actual_text.append(paragraph_without_tags)
 
+    # check if the article has a date
+    if not created_at:
+        print(article_name, article_url)
+        print(paragraphs[:5])
+        print("-" * 20)
+        
     return actual_text, created_at
 
 
@@ -111,6 +126,13 @@ for article_name, article_url in tqdm(articles.items()):
 df = pd.DataFrame(data, columns=['article', 'url', 'text', 'created_at'])
 
 print(df.head())
+
+# show which rows lack a created_at date
+empty_dates = df[df['created_at'].isnull()]
+print(len(empty_dates))
+for i, row in empty_dates.iterrows():
+    print(row['article'], row['url'])
+
 
 # Save the DataFrame to a CSV file
 df.to_csv('data/articles.csv', index=False) # comment out this line when in development
