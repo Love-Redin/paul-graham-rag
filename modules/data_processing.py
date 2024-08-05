@@ -155,6 +155,7 @@ def get_top_n_similar_paragraphs_including_context(query, model, paragraph_df, n
         article_name = row['article_name']
         article_url = row['article_url']
         similarity = row['similarity']
+        article_date = row['created_at']
         if index > 5:
             if paragraph_number > 1:
                 previous_paragraph = paragraph_df[(paragraph_df['article_name'] == article_name) & (paragraph_df['paragraph_number'] == paragraph_number - 1)]['paragraph_text'].values[0]
@@ -242,6 +243,9 @@ def get_top_n_similar_paragraphs_including_context(query, model, paragraph_df, n
                 full_paragraph_text = str(previous_paragraph) + "\n\n" + str(previous_paragraph_1) + "\n\n" + str(previous_paragraph_2) + "\n\n" + str(paragraph_text) + "\n\n" + str(next_paragraph) + "\n\n" + str(next_paragraph_1) + "\n\n" + str(next_paragraph_2)
         full_paragraph_text = full_paragraph_text.strip() # remove leading/trailing whitespace
         #full_paragraph_text = f"{article_name} ({round(similarity*100,1)}% match)" + "\n\n" + full_paragraph_text
-        full_paragraph_text = f"<strong><a href='{article_url}' target='_blank'>{article_name}</a> ({100*similarity:.1f}% match)</strong><br><br>{full_paragraph_text}"
+        if not pd.isna(article_date):
+            full_paragraph_text = f"<strong><a href='{article_url}' target='_blank'>{article_name}</a> ({100*similarity:.1f}% match) - {article_date}</strong><br><br>{full_paragraph_text}"
+        else:
+            full_paragraph_text = f"<strong><a href='{article_url}' target='_blank'>{article_name}</a> ({100*similarity:.1f}% match)</strong><br><br>{full_paragraph_text}"
         top_paragraphs.append(full_paragraph_text) 
     return top_paragraphs
