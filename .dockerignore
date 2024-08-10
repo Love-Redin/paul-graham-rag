@@ -1,0 +1,27 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore virtual environment
+venv/
+
+# Ignore local environment files
+.env
+
+# Ignore version control files
+.git/
+
+# Ignore logs
+logs/
+
+# Ignore test scripts (if they are not needed in production)
+tests/
+
+# Ignore documentation
+README.md
+ideas.md
+streamlit_app.py
+
+# Ignore the Dockerfile and the .dockerignore file itself
+Dockerfile
+.dockerignore
