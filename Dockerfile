@@ -20,4 +20,4 @@ EXPOSE 8501
 ENTRYPOINT ["./entrypoint.sh"]
 
 # Default command is to run the app (can be overridden)
-CMD ["run-app"]
+CMD ["run-all"]
