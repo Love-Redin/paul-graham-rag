@@ -5,8 +5,10 @@ set -e
 run_data_scripts() {
     echo "Running data preparation scripts..."
     python scripts/scraper.py
+    echo "Scraping done. Running vector_db.py..."
     sleep 2
     python scripts/vector_db.py
+    echo "Vector database complete. Running rag.py..."
     sleep 2
     python scripts/rag.py
     echo "Data preparation completed."
@@ -16,6 +18,7 @@ run_data_scripts() {
 run_app() {
     echo "Starting the application..."
     python app.py
+    echo "Application started."
 }
 
 # Check the command passed to the container
