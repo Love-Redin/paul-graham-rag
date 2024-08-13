@@ -133,6 +133,8 @@ print(len(empty_dates))
 for i, row in empty_dates.iterrows():
     print(row['article'], row['url'])
 
+# Check if the 'data' directory exists, if not, create it
+os.makedirs('data', exist_ok=True)
 
 # Save the DataFrame to a CSV file
 df.to_csv('data/articles.csv', index=False) # comment out this line when in development
