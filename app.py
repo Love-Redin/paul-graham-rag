@@ -62,7 +62,7 @@ if __name__ == '__main__':
     #app.run(debug=True, port=7777)
     
     # Render deployment
-    # Get the port from the environment variable, or default to 7777
-    port = int(os.environ.get('PORT', 7777))
+    # Get the port from the environment variable, or default to 10000
+    port = int(os.environ.get('PORT', 10000))
     print(f"Attempting to start Flask app on port {port}...")
     app.run(debug=True, host='0.0.0.0', port=port)

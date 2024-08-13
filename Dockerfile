@@ -14,7 +14,7 @@ RUN chmod +x entrypoint.sh
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port that your application will run on
-EXPOSE 7777
+EXPOSE 10000
 
 # Set the entrypoint script
 ENTRYPOINT ["./entrypoint.sh"]
