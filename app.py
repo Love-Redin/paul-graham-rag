@@ -58,4 +58,10 @@ def query():
     return jsonify(results)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=7777)
+    # Local deployment
+    #app.run(debug=True, port=7777)
+    
+    # Render deployment
+    # Get the port from the environment variable, or default to 7777
+    port = int(os.environ.get('PORT', 7777))
+    app.run(debug=True, host='0.0.0.0', port=port)
