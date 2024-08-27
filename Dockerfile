@@ -20,5 +20,4 @@ EXPOSE 10000
 ENTRYPOINT ["./entrypoint.sh"]
 
 # Default command is to run the app (can be overridden)
-CMD ["run-app"]
-# run-all
+CMD ["run-all"]
