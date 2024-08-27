@@ -14,10 +14,10 @@ run_data_scripts() {
     echo "Data preparation completed."
 }
 
-# Function to run the main application
+# Function to run the main application with Gunicorn
 run_app() {
-    echo "Starting the application..."
-    python app.py
+    echo "Starting the application with Gunicorn..."
+    gunicorn --bind 0.0.0.0:${PORT:-10000} app:app
     echo "Application started."
 }
 
