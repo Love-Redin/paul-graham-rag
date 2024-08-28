@@ -10,7 +10,7 @@ run_app() {
 
 # Check the command passed to the container
 case "$1" in
-    run-appll)
+    run-app)
         run_app
         ;;
     *)
