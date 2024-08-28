@@ -71,7 +71,7 @@ def get_top_n_similar_paragraphs(query, n=10):
     top_n_similar_paragraphs = paragraph_df.sort_values(by='similarity', ascending=False).head(n)['paragraph_text'].tolist()
     return top_n_similar_paragraphs
 
-def get_top_n_similar_paragraphs_including_context(query, n=10):
+def get_top_n_similar_paragraphs_including_context_old(query, n=10):
     # Like above, but include the paragraph before and after the most similar paragraphs
     # For the top 3, include three paragraphs before and after
     # For the next 3, include two paragraphs before and after
@@ -171,17 +171,50 @@ def get_top_n_similar_paragraphs_including_context(query, n=10):
         top_paragraphs.append(full_paragraph_text) 
     return top_paragraphs
 
+def get_top_n_similar_paragraphs_including_context(query, n=10, batch_size=1000):
+    query_embedding = get_embedding(query)
+    
+    top_n_similar_paragraphs = pd.DataFrame()
+    
+    for start in range(0, len(paragraph_df), batch_size):
+        # Process data in batches
+        end = start + batch_size
+        batch = paragraph_df[start:end].copy()
+        
+        batch['similarity'] = batch['embedding'].apply(lambda x: np.dot(x, query_embedding))
+        batch_sorted = batch.sort_values(by='similarity', ascending=False).head(n)
+        
+        # Append to top_n_similar_paragraphs and then sort again to keep only top n overall
+        top_n_similar_paragraphs = pd.concat([top_n_similar_paragraphs, batch_sorted]).sort_values(by='similarity', ascending=False).head(n)
+    
+    top_paragraphs = []
+    for index, row in top_n_similar_paragraphs.iterrows():
+        paragraph_text = row['paragraph_text']
+        paragraph_number = row['paragraph_number']
+        article_name = row['article_name']
+        article_url = row['article_url']
+        similarity = row['similarity']
+        
+        # Simplify the context retrieval by handling edges more robustly
+        context_range = 3 if index <= 2 else 2 if index <= 5 else 1
+        
+        context_paragraphs = []
+        for i in range(-context_range, context_range + 1):
+            if i == 0:
+                continue  # Skip the original paragraph
+            
+            context_paragraph_number = paragraph_number + i
+            if context_paragraph_number > 0 and context_paragraph_number <= paragraph_df[paragraph_df['article_name'] == article_name]['paragraph_number'].max():
+                context_paragraph = paragraph_df[(paragraph_df['article_name'] == article_name) & 
+                                                 (paragraph_df['paragraph_number'] == context_paragraph_number)]['paragraph_text'].values
+                if context_paragraph.size > 0:
+                    context_paragraphs.append(context_paragraph[0])
+        
+        full_paragraph_text = f"{article_name}: {similarity} (top {index+1})\n{' ---> '.join(context_paragraphs)} ---> {paragraph_text}"
+        top_paragraphs.append(full_paragraph_text)
+    
+    return top_paragraphs
 
-query = "What is the best programming language to learn first?"
-query = "How much money should founders raise in their first round of funding?"
-query = "What is the best way to find a co-founder for a startup?"
-query = "What is the best way to build a successful startup?"
-rag_query = rewrite_query(query)
-top_paragraphs = get_top_n_similar_paragraphs_including_context(query)
-print(query, "--->", rag_query)
-for p in top_paragraphs:
-    print(p)
-    print("-"*50)
 
 
 # Function to answer the question
@@ -195,8 +228,22 @@ def answer_question(query, top_paragraphs):
     )
     return completion.choices[0].message.content
 
-answer = answer_question(query, top_paragraphs)
-print(query)
-print(answer)
 
-# TODO (senare): fixa källhänvisningar i svaret
+def main():
+    query = "What is the best programming language to learn first?"
+    query = "How much money should founders raise in their first round of funding?"
+    query = "What is the best way to find a co-founder for a startup?"
+    query = "What is the best way to build a successful startup?"
+    rag_query = rewrite_query(query)
+    top_paragraphs = get_top_n_similar_paragraphs_including_context(query)
+    print(query, "--->", rag_query)
+    for p in top_paragraphs:
+        print(p)
+        print("-"*50)
+
+    answer = answer_question(query, top_paragraphs)
+    print(query)
+    print(answer)
+
+if __name__ == "__main__":
+    main()
