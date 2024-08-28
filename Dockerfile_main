@@ -19,5 +19,5 @@ EXPOSE 10000
 # Set the entrypoint script
 ENTRYPOINT ["./entrypoint.sh"]
 
-# Default command is to run the app
-CMD ["run-app"]
+# Default command is to run the app (can be overridden)
+CMD ["run-all"]
