@@ -1,5 +1,6 @@
 .env
-data/
+data/articles_old.csv
+data/paragraph_embeddings_old.csv
 .venv/
 __pycache__/
 *.py[cod]
