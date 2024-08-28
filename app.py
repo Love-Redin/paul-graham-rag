@@ -1,11 +1,12 @@
-from flask import Flask
+from flask import Flask, render_template
 import os
 
 app = Flask(__name__)
 
+# Route to render the index.html template
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def index():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     # Bind to the environment port, or use 10000 by default
