@@ -10,10 +10,17 @@ import re
 from modules.data_processing import get_top_n_similar_paragraphs_including_context
 from modules.query_rewriter import rewrite_query
 
-app = Flask(__name__)
+# Load environment variables from a .env file
+load_dotenv()
 
 # Initialize the OpenAI API client
 client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+
+# Disable tokenizers parallelism warning
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# Initialize the Flask app
+app = Flask(__name__)
 
 # Load data
 paragraph_df = pd.read_csv('data/paragraph_embeddings.csv', sep=";")
@@ -33,8 +40,6 @@ def answer_question(query, top_paragraphs):
     )
     return completion.choices[0].message.content
 
-
-# Route to render the index.html template
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -52,8 +57,12 @@ def query():
     results = {'query': user_query, 'rag_query': rag_query, 'top_paragraphs': top_paragraphs, 'answer': answer}
     return jsonify(results)
 
-
 if __name__ == '__main__':
-    # Bind to the environment port, or use 10000 by default
+    # Local deployment
+    #app.run(debug=True, port=7777)
+    
+    # Render deployment
+    # Get the port from the environment variable, or default to 10000
     port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port)
+    print(f"Attempting to start Flask app on port {port}...")
+    app.run(debug=True, host='0.0.0.0', port=port)
